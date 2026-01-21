@@ -330,7 +330,7 @@ async def test_metrics_tracking_and_trending(
     print(f"✓ Recorded 30 days of metrics")
     
     # Get statistics
-    print
+    print("\n--- Статистика ---")
 
 stats = metrics_tracker.get_statistics("faithfulness")
 
@@ -388,3 +388,85 @@ print(f"  Metrics: {len(dashboard_data['metrics'])}")
 print(f"  Period: {dashboard_data['period_days']} days")
 
 print("\n✅ Metrics tracking test passed!")
+
+@pytest.mark.e2e 
+@pytest.mark.asyncio 
+async def test_regression_detection( metrics_tracker: MetricsTracker, ): """Обнаружение регрессии при тестировании метрик."""
+    print("\n=== Testing Regression Detection ===")
+
+from datetime import datetime, timedelta
+
+# Baseline period (good performance)
+print("\n--- Recording Baseline ---")
+
+base_date = datetime.utcnow() - timedelta(days=60)
+
+for day in range(30):
+    date = base_date + timedelta(days=day)
+    metrics_tracker.record(
+        "test_metric",
+        0.90,  # Consistently high
+        timestamp=date,
+    )
+
+print(f"✓ Baseline recorded (mean: 0.90)")
+
+# Recent period (degraded performance)
+print("\n--- Recording Recent (Degraded) ---")
+
+recent_date = datetime.utcnow() - timedelta(days=7)
+
+for day in range(7):
+    date = recent_date + timedelta(days=day)
+    metrics_tracker.record(
+        "test_metric",
+        0.75,  # Degraded
+        timestamp=date,
+    )
+
+print(f"✓ Recent recorded (mean: 0.75)")
+
+# Detect regression
+print("\n--- Regression Detection ---")
+
+trend = metrics_tracker.analyze_trend(
+    "test_metric",
+    recent_days=7,
+    baseline_days=30,
+    degradation_threshold=0.05,  # 5% threshold
+)
+
+print(f"✓ Trend detected: {trend.trend}")
+print(f"  Change: {trend.change_percentage:+.1f}%")
+print(f"  Recent: {trend.recent_mean:.3f}")
+print(f"  Baseline: {trend.baseline_mean:.3f}")
+
+# Should detect degradation
+assert trend.trend == "degrading"
+assert trend.change_percentage < -10  # ~16.7% drop
+
+# Regression test suite
+print("\n--- Regression Test Suite ---")
+
+suite = RegressionTestSuite()
+suite.add_test("test_metric", min_value=0.8)
+suite.add_test("test_metric", max_degradation_pct=5.0, baseline_days=30)
+
+results = suite.run(metrics_tracker)
+
+print(f"✓ Test results:")
+print(f"  Total: {results['total_tests']}")
+print(f"  Passed: {results['passed']}")
+print(f"  Failed: {results['failed']}")
+print(f"  All passed: {results['all_passed']}")
+
+if results['failures']:
+    print(f"\n  Failures:")
+    for failure in results['failures']:
+        print(f"    - {failure['reason']}")
+
+# Should have failures due to degradation
+assert not results['all_passed']
+assert results['failed'] > 0
+
+print("\n✅ Regression detection test passed!")
