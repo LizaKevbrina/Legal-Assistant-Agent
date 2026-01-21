@@ -1,0 +1,266 @@
+[tool.poetry]
+name = "legal-assistant"
+version = "1.0.0"
+description = "Production-ready Legal AI Assistant with multimodal RAG"
+authors = ["Your Name <your.email@example.com>"]
+readme = "README.md"
+license = "MIT"
+python = "^3.11"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+# LlamaIndex Ecosystem
+llama-index = "^0.10.0"
+llama-index-core = "^0.10.0"
+llama-index-vector-stores-qdrant = "^0.2.0"
+llama-index-embeddings-openai = "^0.1.0"
+llama-index-llms-openai = "^0.1.0"
+llama-index-llms-anthropic = "^0.1.0"
+llama-parse = "^0.4.0"
+llama-index-postprocessor-cohere-rerank = "^0.1.0"
+
+# Vector Database
+qdrant-client = "^1.7.0"
+
+# Web Framework
+fastapi = "^0.108.0"
+uvicorn = {extras = ["standard"], version = "^0.25.0"}
+python-multipart = "^0.0.6"
+
+# Data Validation
+pydantic = {extras = ["email"], version = "^2.5.0"}
+pydantic-settings = "^2.1.0"
+
+# LLM Client Libraries
+openai = "^1.7.0"
+anthropic = "^0.8.0"
+cohere = "^4.38"
+
+# LLM Routing & Observability
+litellm = "^1.17.0"
+langsmith = "^0.0.70"
+
+# Authentication & Security
+python-jose = {extras = ["cryptography"], version = "^3.3.0"}
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+presidio-analyzer = "^2.2.33"
+presidio-anonymizer = "^2.2.33"
+python-magic = "^0.4.27"  # File type detection
+
+# Caching & Message Queue
+redis = {extras = ["hiredis"], version = "^5.0.1"}
+aiocache = "^0.12.2"
+
+# Logging & Monitoring
+structlog = "^23.2.0"
+prometheus-client = "^0.19.0"
+python-json-logger = "^2.0.7"
+
+# HTTP Client
+httpx = "^0.25.2"
+aiohttp = "^3.9.1"
+
+# Retry & Error Handling
+tenacity = "^8.2.3"
+
+# Document Processing
+pdf2image = "^1.16.3"
+pytesseract = "^0.3.10"
+Pillow = "^10.1.0"
+
+# Data Processing
+pandas = "^2.1.4"
+numpy = "^1.26.2"
+
+# NLP
+spacy = "^3.7.2"
+transformers = "^4.36.0"  # For CLIP embeddings (images)
+
+# Database (for future use)
+sqlalchemy = "^2.0.23"
+alembic = "^1.13.1"
+asyncpg = "^0.29.0"  # Async Postgres driver
+
+# Utils
+python-dotenv = "^1.0.0"
+pyyaml = "^6.0.1"
+click = "^8.1.7"  # CLI
+rich = "^13.7.0"  # Pretty terminal output
+
+[tool.poetry.group.dev.dependencies]
+# Testing
+pytest = "^7.4.3"
+pytest-asyncio = "^0.21.1"
+pytest-cov = "^4.1.0"
+pytest-mock = "^3.12.0"
+pytest-timeout = "^2.2.0"
+pytest-xdist = "^3.5.0"  # Parallel testing
+faker = "^21.0.0"  # Fake data generation
+
+# Evaluation
+ragas = "^0.1.0"
+deepeval = "^0.20.0"  # Alternative evaluation framework
+
+# Code Quality
+ruff = "^0.1.9"  # Linter & formatter
+mypy = "^1.7.1"  # Type checking
+black = "^23.12.1"  # Code formatter (backup)
+isort = "^5.13.2"  # Import sorting
+pylint = "^3.0.3"  # Additional linting
+bandit = "^1.7.6"  # Security linting
+
+# Type Stubs
+types-redis = "^4.6.0"
+types-PyYAML = "^6.0.12"
+types-passlib = "^1.7.7"
+
+# Documentation
+mkdocs = "^1.5.3"
+mkdocs-material = "^9.5.3"
+mkdocstrings = {extras = ["python"], version = "^0.24.0"}
+
+# Development Tools
+ipython = "^8.19.0"
+ipdb = "^0.13.13"
+pre-commit = "^3.6.0"
+
+[tool.poetry.group.test.dependencies]
+pytest = "^7.4.3"
+pytest-asyncio = "^0.21.1"
+pytest-cov = "^4.1.0"
+httpx = "^0.25.2"  # For testing FastAPI
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+# =============================================================================
+# TOOL CONFIGURATIONS
+# =============================================================================
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = [
+    "-ra",  # Show summary of all test outcomes
+    "-q",   # Quiet mode
+    "--strict-markers",  # Strict marker usage
+    "--strict-config",   # Strict config usage
+    "--cov=legal_assistant",  # Coverage for our package
+    "--cov-report=term-missing",  # Show missing lines
+    "--cov-report=html",  # HTML coverage report
+    "--cov-report=xml",   # XML for CI
+    "--cov-fail-under=85",  # Fail if coverage < 85%
+]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+asyncio_mode = "auto"
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+    "smoke: marks tests as smoke tests",
+]
+
+[tool.coverage.run]
+source = ["legal_assistant"]
+omit = [
+    "*/tests/*",
+    "*/test_*.py",
+    "*/__pycache__/*",
+    "*/site-packages/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "C",   # flake8-comprehensions
+    "B",   # flake8-bugbear
+    "UP",  # pyupgrade
+]
+ignore = [
+    "E501",  # line too long (handled by formatter)
+    "B008",  # do not perform function calls in argument defaults
+    "C901",  # too complex
+]
+
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["F401"]  # Unused imports in __init__.py
+"tests/*" = ["S101"]  # Use of assert in tests
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_any_unimported = false
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+check_untyped_defs = true
+strict_equality = true
+
+[[tool.mypy.overrides]]
+module = [
+    "llama_index.*",
+    "llama_parse.*",
+    "qdrant_client.*",
+    "presidio_analyzer.*",
+    "presidio_anonymizer.*",
+    "ragas.*",
+    "litellm.*",
+    "cohere.*",
+]
+ignore_missing_imports = true
+
+[tool.black]
+line-length = 100
+target-version = ['py311']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 100
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+ensure_newline_before_comments = true
+
+[tool.bandit]
+exclude_dirs = ["tests", "test"]
+skips = ["B101", "B601"]  # Skip assert_used and shell_injection (handled by other tools)
